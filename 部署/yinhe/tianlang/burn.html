@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>信件</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        }
+
+        .letter-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            aspect-ratio: 3 / 4;
+            background-color: #fff;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        #burnVideo {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 1;
+        }
+
+        /* 新版文字区：第一行放到 Dear you 下方两行 */
+        .letter-text {
+            position: absolute;
+            top: 23.5%;
+            left: 16.2%;
+            width: 69%;
+            z-index: 2;
+            color: #3e4e5e;
+            font-family: 'Kaiti', '楷体', 'STKaiti', serif;
+            font-size: 13px;
+            font-weight: 400;
+            letter-spacing: 0.2px;
+            transition: opacity 1s ease;
+            pointer-events: none;
+        }
+
+        /* 每一行单独控制，和背景横线对齐 */
+        .line {
+            height: 15px;
+            line-height: 15px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-align: justify;
+            text-align-last: justify;
+        }
+
+        /* 强制每一行都拉满 */
+        .line::after {
+            content: '';
+            display: inline-block;
+            width: 100%;
+        }
+
+        .ui-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 3;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+            padding-bottom: 40px;
+            background: transparent;
+            transition: opacity 0.5s ease;
+        }
+
+        #readBtn {
+            padding: 10px 25px;
+            font-size: 14px;
+            color: #666;
+            background-color: rgba(255, 255, 255, 0.9);
+            border: 1px solid #eee;
+            border-radius: 20px;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        #readBtn:hover {
+            background-color: #fff;
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="letter-container">
+        <video id="burnVideo" src="燃烧信纸原视频.mp4" playsinline preload="auto"></video>
+
+        <div class="letter-text" id="letterText">
+            <div class="line">亲爱的，你要如何才能明白</div>
+            <div class="line">我因此而泪流不止</div>
+            <div class="line"></div>
+            <div class="line">康佳怡，我爱你</div>
+            <div class="line">❤️</div>
+            <div class="line"></div>
+            <div class="line">不会因恋爱发生的矛盾而改变结局</div>
+            <div class="line"></div>
+            <div class="line"></div>
+            <div class="line"> </div>
+            <div class="line"> </div>
+            <div class="line"> </div>
+            <div class="line"> </div>
+            <div class="line"> </div>
+            <div class="line"> </div>
+            <div class="line"> </div>
+            <div class="line"> </div>
+            <div class="line"> </div>
+            <div class="line"> </div>
+            <div class="line"> </div>
+            <div class="line"> </div>
+            <div class="line"> </div>
+            <div class="line"> </div>
+            <div class="line"> </div>
+            <div class="line"> </div>
+            <div class="line"> </div>
+        </div>
+
+        <div class="ui-overlay" id="uiOverlay">
+            <button id="readBtn">~阅读完毕~</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const video = document.getElementById('burnVideo');
+            const btn = document.getElementById('readBtn');
+            const overlay = document.getElementById('uiOverlay');
+            const textLayer = document.getElementById('letterText');
+
+            video.currentTime = 0;
+            video.pause();
+
+            btn.addEventListener('click', () => {
+                overlay.style.opacity = '0';
+                textLayer.style.opacity = '0';
+
+                setTimeout(() => {
+                    overlay.style.display = 'none';
+                    textLayer.style.display = 'none';
+                }, 1000);
+
+                video.muted = false;
+                video.play().catch(e => console.log("播放被拦截:", e));
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>star</title>
+    <style>
+        /* 设置body和html全屏 */
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+            /* 视频未加载时的背景色 */
+        }
+
+        /* 背景视频 */
+        .video-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -1;
+        }
+
+        /* 原有的中心文字内容样式 */
+        .content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: rgb(240, 17, 155);
+            font-size: 0.5rem;
+            font-family: 华文彩云;
+            animation: pulse 1.5s infinite;
+            text-align: center;
+            z-index: 1;
+        }
+
+        /* ----- 恒星相关样式 ----- */
+        .star-container {
+            position: absolute;
+            /* 基础定位由JS动态赋予 */
+            z-index: 10; 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        /* 恒星本体 */
+        .star {
+            width: 6px;
+            height: 6px;
+            background-color: #fff;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #fff, 0 0 20px #e0f7fa;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        /* 恒星名字标签 */
+        .star-name {
+            margin-top: 8px;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 14px;
+            font-family: "Microsoft YaHei", sans-serif;
+            text-shadow: 0 0 5px #000;
+            pointer-events: none; /* 防止文字干扰点击 */
+            transition: opacity 0.3s ease;
+        }
+
+        /* 鼠标悬停特效 */
+        .star-container:hover .star {
+            transform: scale(1.8);
+            box-shadow: 0 0 15px #fff, 0 0 30px #80deea, 0 0 40px #fff;
+        }
+        .star-container:hover .star-name {
+            color: #fff;
+            text-shadow: 0 0 10px #00e5ff;
+        }
+
+        /* 点击后的闪光爆发特效 */
+        .flash-effect .star {
+            animation: starFlash 0.6s ease-out forwards;
+        }
+        .flash-effect .star-name {
+            opacity: 0; /* 爆发时隐藏文字 */
+        }
+
+        @keyframes starFlash {
+            0% { transform: scale(1); box-shadow: 0 0 10px #fff; }
+            40% { transform: scale(5); background-color: #fff; box-shadow: 0 0 50px #fff, 0 0 100px #00e5ff; }
+            100% { transform: scale(0); opacity: 0; box-shadow: 0 0 0 transparent; }
+        }
+    </style>
+</head>
+<body>
+
+    <video class="video-background" autoplay muted loop controls id="bg-video">
+        <source src="star.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+    
+    <audio id="music1" loop preload="auto" controls hidden>
+        <source src="http://music.163.com/song/media/outer/url?id=1963443271.mp3">
+        Your browser does not support the audio element.
+    </audio>
+      
+    <div class="content">
+        </div>
+
+    <div id="galaxy"></div>
+
+    <script>
+        // 1. 设置视频播放速度
+        var myVideo = document.getElementById('bg-video');
+        myVideo.playbackRate = 0.8; 
+
+        // 2. 点击页面空白处播放音乐 (防止点击恒星时触发两次)
+        document.body.addEventListener('click', function(e) {
+            // 如果点击的不是恒星，才尝试播放音乐
+            if(!e.target.closest('.star-container')){
+                var myAudio = document.getElementById('music1');
+                myAudio.play();
+            }
+        });
+
+        // ----- 恒星数据与生成逻辑 -----
+
+        // 定义真实的恒星数据：已删减至4颗，并使用不规则的分布坐标
+        const starsData = [
+            { name: "天狼星 (Sirius)", top: "15%", left: "18%", targetPage: "tianlang/letter.html" },
+            { name: "织女星 (Vega)", top: "78%", left: "25%", targetPage: "zhinv/time.html" },
+            { name: "参宿四 (Betelgeuse)", top: "28%", left: "75%", targetPage: "canxiu/nvshen.html" },
+            { name: "南门二 (Alpha Centauri)", top: "65%", left: "82%", targetPage: "nanmen/tanchuang.html" }
+        ];
+
+        const galaxy = document.getElementById('galaxy');
+
+        // 遍历数据生成恒星节点
+        starsData.forEach(starData => {
+            // 创建容器
+            const container = document.createElement('div');
+            container.className = 'star-container';
+            container.style.top = starData.top;
+            container.style.left = starData.left;
+
+            // 创建发光球体
+            const starNode = document.createElement('div');
+            starNode.className = 'star';
+
+            // 创建名字标签
+            const nameNode = document.createElement('div');
+            nameNode.className = 'star-name';
+            nameNode.innerText = starData.name;
+
+            // 组装
+            container.appendChild(starNode);
+            container.appendChild(nameNode);
+            galaxy.appendChild(container);
+
+            // 绑定点击事件：闪光特效 + 跳转
+            container.addEventListener('click', function(e) {
+                e.stopPropagation(); // 阻止事件冒泡到body
+                
+                // 播放背景音乐（如果还没播放的话）
+                document.getElementById('music1').play();
+
+                // 添加闪光特效class
+                this.classList.add('flash-effect');
+
+                // 延迟跳转，等待动画播放完毕 (600ms与CSS动画时间一致)
+                setTimeout(() => {
+                    // 替换成你实际想要跳转的页面
+                    console.log(`跳转到：${starData.targetPage}`);
+                    window.location.href = starData.targetPage; 
+                    
+                    // 为了演示不报错，这里使用 alert 代替真实的页面跳转。
+                    // 实际使用时，请删除下面这行，并取消上面 window.location.href 的注释。
+                   //  alert("即将跳转到：" + starData.targetPage); 
+                }, 600);
+            });
+        });
+    </script>
+
+</body>
+</html>
