@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>恋爱蓄水池</title>
+    <style>
+        /* 基础样式重置 */
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: 'Helvetica Neue', Helvetica, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            overflow: hidden;
+        }
+
+        /* 视频背景设置 */
+        #bg-video {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            min-width: 100%;
+            min-height: 100%;
+            width: auto;
+            height: auto;
+            transform: translateX(-50%) translateY(-50%);
+            z-index: -2;
+            object-fit: cover;
+        }
+
+        /* 视频遮罩层：让文字更容易看清 */
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4); /* 40%透明度的黑色遮罩 */
+            z-index: -1;
+        }
+
+        /* 页面主体内容容器 */
+        .content {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            color: #fff;
+            text-align: center;
+        }
+
+        /* 标题样式 */
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 40px;
+            font-weight: 300;
+            letter-spacing: 4px;
+            color: #ffb6c1; /* 浅粉色 */
+            text-shadow: 0 0 15px rgba(255, 105, 180, 0.8); /* 霓虹发光效果 */
+        }
+
+        /* 计时器容器 */
+        .timer {
+            display: flex;
+            gap: 25px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        /* 单个时间区块（毛玻璃效果） */
+        .time-box {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            padding: 20px 30px;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 182, 193, 0.2);
+            min-width: 80px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            transition: transform 0.3s ease;
+        }
+
+        .time-box:hover {
+            transform: translateY(-5px);
+        }
+
+        /* 数字样式 */
+        .number {
+            font-size: 4rem;
+            font-weight: bold;
+            line-height: 1;
+            color: #fff;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+
+        /* 标签样式（天、时、分、秒） */
+        .label {
+            font-size: 1.1rem;
+            margin-top: 12px;
+            color: #ffb6c1;
+            letter-spacing: 2px;
+        }
+
+        /* 底部留言 */
+        .message {
+            margin-top: 60px;
+            font-size: 1.2rem;
+            max-width: 600px;
+            line-height: 1.8;
+            color: rgba(255, 255, 255, 0.8);
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            padding: 0 20px;
+        }
+
+        /* 响应式设计：适配手机屏幕 */
+        @media (max-width: 768px) {
+            h1 { font-size: 2rem; }
+            .number { font-size: 2.5rem; }
+            .time-box { padding: 15px 20px; min-width: 60px; }
+            .timer { gap: 10px; }
+        }
+    </style>
+</head>
+<body>
+
+    <video autoplay loop muted playsinline id="bg-video">
+        <source src="heart.mp4" type="video/mp4">
+        您的浏览器不支持 HTML5 视频。
+    </video>
+
+    <div class="overlay"></div>
+
+    <div class="content">
+        <h1>我们已经相爱了</h1>
+        
+        <div class="timer">
+            <div class="time-box">
+                <div class="number" id="days">00</div>
+                <div class="label">天</div>
+            </div>
+            <div class="time-box">
+                <div class="number" id="hours">00</div>
+                <div class="label">小时</div>
+            </div>
+            <div class="time-box">
+                <div class="number" id="minutes">00</div>
+                <div class="label">分钟</div>
+            </div>
+            <div class="time-box">
+                <div class="number" id="seconds">00</div>
+                <div class="label">秒</div>
+            </div>
+        </div>
+
+        <div class="message">
+            每一个有你的日子，都是我生命中最美的时光。<br>
+            星光璀璨，不及你眼底柔情。
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // 请在这里修改你们在一起的纪念日时间！
+        // 格式：年-月-日T时:分:秒
+        // ==========================================
+        const startDateString = "2025-07-02T00:34:00"; 
+        
+        const startDate = new Date(startDateString).getTime();
+
+        function updateTimer() {
+            const now = new Date().getTime();
+            const distance = now - startDate;
+
+            // 计算时间差
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            // 格式化数字：不足两位补0
+            document.getElementById("days").innerText = days.toString().padStart(2, '0');
+            document.getElementById("hours").innerText = hours.toString().padStart(2, '0');
+            document.getElementById("minutes").innerText = minutes.toString().padStart(2, '0');
+            document.getElementById("seconds").innerText = seconds.toString().padStart(2, '0');
+        }
+
+        // 每秒更新一次
+        setInterval(updateTimer, 1000);
+        // 页面加载时立即执行一次，避免出现00的闪烁
+        updateTimer();
+    </script>
+
+</body>
+</html>

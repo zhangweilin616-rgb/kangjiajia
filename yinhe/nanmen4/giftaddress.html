@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>你的专属投喂</title>
+    <style>
+        /* 引入优雅的字体 */
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&display=swap');
+
+        :root {
+            --primary-color: #ff9a9e;
+            --secondary-color: #fecfef;
+            --text-dark: #4a4a4a;
+            --text-light: #7a7a7a;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: 'Noto Serif SC', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            overflow: hidden; /* 防止背景动画产生滚动条 */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* 唯美动态渐变背景 */
+        .animated-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(-45deg, #ff9a9e, #fecfef, #a1c4fd, #c2e9fb);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            z-index: -2;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* 悬浮光点/气泡动画 */
+        .bubbles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .bubble {
+            position: absolute;
+            bottom: -100px;
+            background-color: rgba(255, 255, 255, 0.4);
+            border-radius: 50%;
+            animation: floatUp 10s infinite ease-in;
+        }
+
+        @keyframes floatUp {
+            0% { transform: translateY(0) scale(1); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: translateY(-100vh) scale(1.5); opacity: 0; }
+        }
+
+        /* 生成不同大小和速度的气泡 */
+        .bubble:nth-child(1) { width: 40px; height: 40px; left: 10%; animation-duration: 8s; }
+        .bubble:nth-child(2) { width: 20px; height: 20px; left: 20%; animation-duration: 5s; animation-delay: 1s; }
+        .bubble:nth-child(3) { width: 50px; height: 50px; left: 35%; animation-duration: 10s; animation-delay: 2s; }
+        .bubble:nth-child(4) { width: 30px; height: 30px; left: 50%; animation-duration: 7s; animation-delay: 0s; }
+        .bubble:nth-child(5) { width: 60px; height: 60px; left: 70%; animation-duration: 11s; animation-delay: 3s; }
+        .bubble:nth-child(6) { width: 25px; height: 25px; left: 85%; animation-duration: 6s; animation-delay: 2s; }
+
+        /* 高级毛玻璃表单容器 */
+        .glass-container {
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+            border-radius: 24px;
+            padding: 50px 40px;
+            width: 100%;
+            max-width: 420px;
+            box-sizing: border-box;
+            transform: translateY(20px);
+            opacity: 0;
+            animation: fadeInUp 1s forwards ease-out;
+        }
+
+        @keyframes fadeInUp {
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .header-icon {
+            text-align: center;
+            font-size: 44px;
+            margin-bottom: 10px;
+            animation: bounce 2s infinite ease-in-out;
+            text-shadow: 0 4px 10px rgba(255, 154, 158, 0.5);
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-10px) scale(1.1); }
+        }
+
+        .glass-container h2 {
+            text-align: center;
+            color: var(--text-dark);
+            margin: 0 0 10px 0;
+            font-size: 26px;
+            font-weight: 700;
+            letter-spacing: 2px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: var(--text-light);
+            font-size: 14px;
+            margin-bottom: 40px;
+            font-family: 'PingFang SC', sans-serif;
+            position: relative;
+        }
+        
+        .subtitle::after {
+            content: '';
+            display: block;
+            width: 40px;
+            height: 2px;
+            background: var(--primary-color);
+            margin: 15px auto 0;
+            border-radius: 2px;
+        }
+
+        /* 极简动效输入框 */
+        .form-group {
+            position: relative;
+            margin-bottom: 35px;
+        }
+
+        .form-group input, 
+        .form-group textarea {
+            width: 100%;
+            padding: 10px 0;
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+            color: var(--text-dark);
+            font-size: 16px;
+            outline: none;
+            box-sizing: border-box;
+            transition: border-color 0.3s;
+            font-family: inherit;
+        }
+
+        .form-group textarea {
+            resize: none;
+            min-height: 30px;
+            overflow: hidden;
+        }
+
+        .form-group label {
+            position: absolute;
+            top: 10px;
+            left: 0;
+            color: var(--text-light);
+            font-size: 15px;
+            pointer-events: none;
+            transition: 0.3s ease all;
+            font-family: 'PingFang SC', sans-serif;
+        }
+
+        /* 输入框聚焦时的动画效果 */
+        .form-group input:focus ~ label,
+        .form-group input:valid ~ label,
+        .form-group textarea:focus ~ label,
+        .form-group textarea:valid ~ label {
+            top: -20px;
+            font-size: 13px;
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        .form-group .focus-border {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background-color: var(--primary-color);
+            transition: 0.4s;
+        }
+
+        .form-group input:focus ~ .focus-border,
+        .form-group textarea:focus ~ .focus-border {
+            width: 100%;
+            left: 0;
+        }
+
+        /* 渐变流光按钮 */
+        .submit-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(45deg, #ff9a9e, #fecfef);
+            color: #d15c71;
+            border: none;
+            border-radius: 30px;
+            font-size: 16px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            cursor: pointer;
+            box-shadow: 0 10px 20px rgba(255, 154, 158, 0.3);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .submit-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, #a1c4fd, #c2e9fb);
+            z-index: -1;
+            transition: opacity 0.5s ease;
+            opacity: 0;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 15px 25px rgba(161, 196, 253, 0.4);
+            color: #4a74b5;
+        }
+
+        .submit-btn:hover::before {
+            opacity: 1;
+        }
+        
+        .submit-btn:active {
+            transform: translateY(1px);
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="animated-bg"></div>
+
+    <div class="bubbles">
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+    </div>
+
+    <div class="glass-container">
+        <div class="header-icon">🎁</div>
+        <h2>小猪的礼物</h2>
+        <p class="subtitle">爱心盲盒（๑•̀ㅁ•́ฅ)</p>
+        
+        <form action="#" method="POST" onsubmit="alert('礼物到达倒计时 ✨'); return false;">
+            
+            <div class="form-group">
+                <input type="text" id="name" name="name" required>
+                <label for="name">小猪的名字</label>
+                <span class="focus-border"></span>
+            </div>
+
+            <div class="form-group">
+                <input type="tel" id="phone" name="phone" pattern="[0-9]{11}" title="请输入11位手机号码" required>
+                <label for="phone">快递员会打给谁呢</label>
+                <span class="focus-border"></span>
+            </div>
+
+            <div class="form-group">
+                <textarea id="address" name="address" required oninput="this.style.height = '';this.style.height = this.scrollHeight + 'px'"></textarea>
+                <label for="address">猪圈的具体坐标</label>
+                <span class="focus-border"></span>
+            </div>
+
+            <button type="submit" class="submit-btn">(⁄ ⁄•⁄ω⁄•⁄ ⁄) 确认收下！</button>
+            
+        </form>
+    </div>
+
+</body>
+</html>

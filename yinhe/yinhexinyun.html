@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Star Galaxy</title>
+    <style>
+        /* 设置body和html全屏 */
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        /* 背景视频 */
+        .video-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -2;
+        }
+
+        /* 新增：深色径向渐变遮罩，增加宇宙空间的深邃感并凸显星星 */
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(0,0,0,0) 30%, rgba(0,0,0,0.6) 100%);
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* 中心文字内容样式 */
+        .content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: rgb(240, 17, 155);
+            font-size: 2rem; /* 稍微放大以便看清 */
+            font-family: 华文彩云, sans-serif;
+            animation: pulse 3s ease-in-out infinite;
+            text-align: center;
+            z-index: 1;
+            pointer-events: none; /* 防止遮挡点击 */
+        }
+
+        /* 修复缺失的文字脉冲动画 */
+        @keyframes pulse {
+            0% { opacity: 0.6; transform: translate(-50%, -50%) scale(0.95); }
+            50% { opacity: 1; transform: translate(-50%, -50%) scale(1.05); text-shadow: 0 0 20px rgba(240, 17, 155, 0.5); }
+            100% { opacity: 0.6; transform: translate(-50%, -50%) scale(0.95); }
+        }
+
+        /* ----- 恒星相关样式 ----- */
+        .star-container {
+            position: absolute;
+            z-index: 10; 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            /* 新增：缓慢漂浮动画 */
+            animation: float 4s ease-in-out infinite alternate;
+        }
+
+        /* 恒星本体 */
+        .star {
+            width: 7px;
+            height: 7px;
+            background-color: #fff;
+            border-radius: 50%;
+            /* 阴影由JS动态根据星体颜色分配 */
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s ease;
+            /* 新增：自身闪烁动画 */
+            animation: twinkle 2s infinite alternate;
+        }
+
+        /* 恒星名字标签 */
+        .star-name {
+            margin-top: 10px;
+            color: rgba(255, 255, 255, 0.85);
+            font-size: 14px;
+            font-family: "Microsoft YaHei", sans-serif;
+            text-shadow: 0 0 6px #000, 0 0 12px rgba(255, 255, 255, 0.2);
+            pointer-events: none;
+            transition: all 0.3s ease;
+            letter-spacing: 1px;
+        }
+
+        /* 鼠标悬停特效 */
+        .star-container:hover .star {
+            transform: scale(2.2);
+            animation: none; /* 悬停时停止闪烁，保持高亮 */
+        }
+        .star-container:hover .star-name {
+            color: #fff;
+            transform: translateY(-3px); /* 名字稍微上浮 */
+        }
+
+        /* 点击后的闪光爆发特效 */
+        .flash-effect .star {
+            animation: starFlash 0.6s ease-out forwards !important;
+        }
+        .flash-effect .star-name {
+            opacity: 0; 
+        }
+
+        /* ----- 新增的自然动画帧 ----- */
+        @keyframes float {
+            0% { transform: translateY(0px) translateX(0px); }
+            100% { transform: translateY(-8px) translateX(4px); }
+        }
+
+        @keyframes twinkle {
+            0% { opacity: 0.5; transform: scale(0.8); }
+            100% { opacity: 1; transform: scale(1.1); }
+        }
+
+        @keyframes starFlash {
+            0% { transform: scale(1); }
+            40% { transform: scale(6); background-color: #fff; box-shadow: 0 0 50px #fff, 0 0 100px #fff !important; }
+            100% { transform: scale(0); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <video class="video-background" autoplay muted loop playsinline id="bg-video">
+        <source src="star.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+    
+    <div class="overlay"></div>
+    
+    <audio id="music1" loop preload="auto" hidden>
+        <source src="http://music.163.com/song/media/outer/url?id=1963443271.mp3">
+        Your browser does not support the audio element.
+    </audio>
+      
+    <div class="content"></div>
+
+    <div id="galaxy"></div>
+
+    <script>
+        // 1. 设置视频播放速度
+        var myVideo = document.getElementById('bg-video');
+        myVideo.playbackRate = 0.8; 
+
+        // 2. 点击页面空白处播放音乐
+        document.body.addEventListener('click', function(e) {
+            if(!e.target.closest('.star-container')){
+                var myAudio = document.getElementById('music1');
+                myAudio.play().catch(err => console.log("需要用户互动才能播放音乐"));
+            }
+        });
+
+        // ----- 恒星数据与生成逻辑 -----
+        // 新增了 glowColor 字段，模拟真实恒星的颜色，让画面更生动
+        const starsData = [
+            { name: "天狼星 (Sirius)", top: "15%", left: "18%", targetPage: "tianlang1/letter.html", glowColor: "#99ccff" },      // 蓝白色
+            { name: "织女星 (Vega)", top: "78%", left: "25%", targetPage: "zhinv3/time.html", glowColor: "#ffffff" },          // 纯白色
+            { name: "参宿四 (Betelgeuse)", top: "28%", left: "75%", targetPage: "canxiu2/star.html", glowColor: "#ff9955" },   // 红橙色
+            { name: "南门二 (Alpha Centauri)", top: "65%", left: "82%", targetPage: "nanmen4/tanchuang.html", glowColor: "#ffdd99" } // 黄白色
+        ];
+
+        const galaxy = document.getElementById('galaxy');
+
+        starsData.forEach(starData => {
+            const container = document.createElement('div');
+            container.className = 'star-container';
+            container.style.top = starData.top;
+            container.style.left = starData.left;
+
+            // 给每颗星星赋予随机的动画延迟时间，使其闪烁和漂浮节奏不同，更显自然
+            const randomDelay = (Math.random() * 3).toFixed(2);
+            container.style.animationDelay = `-${randomDelay}s`;
+
+            const starNode = document.createElement('div');
+            starNode.className = 'star';
+            starNode.style.animationDelay = `-${randomDelay}s`;
+            // 根据数据渲染专属颜色的光晕
+            starNode.style.boxShadow = `0 0 10px ${starData.glowColor}, 0 0 20px ${starData.glowColor}`;
+
+            // 鼠标悬停时的光晕变化
+            container.addEventListener('mouseenter', () => {
+                starNode.style.boxShadow = `0 0 15px #fff, 0 0 35px ${starData.glowColor}, 0 0 50px ${starData.glowColor}`;
+                container.querySelector('.star-name').style.textShadow = `0 0 15px ${starData.glowColor}, 0 0 25px ${starData.glowColor}`;
+            });
+            container.addEventListener('mouseleave', () => {
+                starNode.style.boxShadow = `0 0 10px ${starData.glowColor}, 0 0 20px ${starData.glowColor}`;
+                container.querySelector('.star-name').style.textShadow = `0 0 6px #000, 0 0 12px rgba(255, 255, 255, 0.2)`;
+            });
+
+            const nameNode = document.createElement('div');
+            nameNode.className = 'star-name';
+            nameNode.innerText = starData.name;
+
+            container.appendChild(starNode);
+            container.appendChild(nameNode);
+            galaxy.appendChild(container);
+
+            container.addEventListener('click', function(e) {
+                e.stopPropagation(); 
+                
+                document.getElementById('music1').play().catch(err => {});
+
+                this.classList.add('flash-effect');
+
+                setTimeout(() => {
+                    console.log(`跳转到：${starData.targetPage}`);
+                     window.location.href = starData.targetPage; 
+                }, 600);
+            });
+        });
+    </script>
+
+</body>
+</html>

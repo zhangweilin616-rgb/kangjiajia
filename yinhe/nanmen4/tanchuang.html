@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>爱意加载中...</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg1: #fffafc;
+      --bg2: #fff0f6;
+      --bg3: #eef7ff;
+      --pink: #ff92c2;
+      --pink2: #ffb4d6;
+      --blue: #98cfff;
+      --blue2: #cbe7ff;
+      --purple: #c8b6ff;
+      --yellow: #ffe699;
+      --text: #5b526b;
+      --shadow: rgba(147, 112, 219, 0.10);
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      font-family: "Microsoft YaHei", "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at 20% 20%, rgba(255, 214, 234, 0.85), transparent 28%),
+        radial-gradient(circle at 80% 25%, rgba(205, 232, 255, 0.85), transparent 25%),
+        radial-gradient(circle at 75% 80%, rgba(255, 243, 199, 0.70), transparent 22%),
+        linear-gradient(135deg, var(--bg1), var(--bg2) 48%, var(--bg3));
+      color: var(--text);
+    }
+
+    #stage {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      cursor: pointer;
+    }
+
+    /* 背景柔光 */
+    .bg-glow {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(75px);
+      opacity: 0.35;
+      pointer-events: none;
+      animation: glowMove 8s ease-in-out infinite alternate;
+    }
+
+    .bg-glow.one {
+      width: 360px;
+      height: 360px;
+      left: 8%;
+      top: 8%;
+      background: rgba(255, 175, 209, 0.45);
+    }
+
+    .bg-glow.two {
+      width: 420px;
+      height: 420px;
+      right: 6%;
+      bottom: 10%;
+      background: rgba(166, 213, 255, 0.40);
+      animation-duration: 10s;
+    }
+
+    .bg-glow.three {
+      width: 260px;
+      height: 260px;
+      left: 45%;
+      bottom: 12%;
+      background: rgba(255, 235, 170, 0.30);
+      animation-duration: 12s;
+    }
+
+    @keyframes glowMove {
+      from { transform: translateY(0) translateX(0) scale(1); }
+      to { transform: translateY(25px) translateX(12px) scale(1.08); }
+    }
+
+    /* 云朵 */
+    .cloud {
+      position: absolute;
+      width: 140px;
+      height: 54px;
+      background: rgba(255,255,255,0.82);
+      border-radius: 999px;
+      box-shadow: 0 10px 28px rgba(255,255,255,0.4);
+      filter: blur(0.2px);
+      animation: cloudFloat linear infinite;
+      pointer-events: none;
+    }
+
+    .cloud::before,
+    .cloud::after {
+      content: "";
+      position: absolute;
+      background: rgba(255,255,255,0.9);
+      border-radius: 50%;
+    }
+
+    .cloud::before {
+      width: 52px;
+      height: 52px;
+      left: 18px;
+      top: -18px;
+    }
+
+    .cloud::after {
+      width: 66px;
+      height: 66px;
+      right: 18px;
+      top: -28px;
+    }
+
+    .cloud .blush {
+      position: absolute;
+      width: 14px;
+      height: 8px;
+      background: rgba(255, 168, 196, 0.35);
+      border-radius: 999px;
+      top: 28px;
+    }
+
+    .cloud .b1 { left: 34px; }
+    .cloud .b2 { right: 34px; }
+
+    @keyframes cloudFloat {
+      from { transform: translateX(-220px); }
+      to { transform: translateX(calc(100vw + 260px)); }
+    }
+
+    /* 星星 */
+    .star {
+      position: absolute;
+      color: rgba(255,255,255,0.95);
+      text-shadow: 0 0 10px rgba(255,255,255,0.7);
+      pointer-events: none;
+      animation: starTwinkle ease-in-out infinite;
+      user-select: none;
+    }
+
+    @keyframes starTwinkle {
+      0%, 100% { opacity: 0.25; transform: scale(0.8) rotate(0deg); }
+      50% { opacity: 1; transform: scale(1.2) rotate(12deg); }
+    }
+
+    /* 弹窗 */
+    .win {
+      position: absolute;
+      width: 178px;
+      height: 108px;
+      border-radius: 18px;
+      overflow: hidden;
+      background: rgba(255,255,255,0.88);
+      border: 1px solid rgba(255,255,255,0.95);
+      box-shadow:
+        0 14px 38px rgba(255, 164, 202, 0.14),
+        0 8px 18px rgba(166, 203, 255, 0.12),
+        inset 0 1px 0 rgba(255,255,255,0.9);
+      backdrop-filter: blur(12px);
+      user-select: none;
+      pointer-events: none;
+      opacity: 0;
+      z-index: 10;
+      transform: scale(0.72);
+    }
+
+    .win.show {
+      animation: popIn 0.32s cubic-bezier(.2,.85,.2,1) forwards;
+    }
+
+    .win.vanish {
+      animation: vanish 0.5s ease forwards !important;
+    }
+
+    @keyframes popIn {
+      0% { opacity: 0; transform: scale(0.72) translateY(12px); }
+      70% { opacity: 1; transform: scale(1.04) translateY(-2px); }
+      100% { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    @keyframes vanish {
+      0% { opacity: 1; filter: blur(0); }
+      100% { opacity: 0; filter: blur(8px); transform: scale(0.6) translateY(10px); }
+    }
+
+    .titlebar {
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 10px 0 12px;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+      border-bottom: 1px solid rgba(255,255,255,0.45);
+    }
+
+    .title-left {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      min-width: 0;
+    }
+
+    .win-icon {
+      width: 13px;
+      height: 13px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.95);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.55);
+      flex: 0 0 auto;
+    }
+
+    .title-text {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      flex: 0 0 auto;
+    }
+
+    .btn {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      box-shadow: inset 0 -1px 0 rgba(0,0,0,0.08);
+      opacity: 0.92;
+    }
+
+    .btn.min { background: #ffe28b; }
+    .btn.max { background: #9ce4a2; }
+    .btn.close { background: #ff9bbb; }
+
+    .content {
+      position: relative;
+      height: calc(100% - 30px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px 14px;
+      text-align: center;
+      font-size: 16px;
+      font-weight: 600;
+      color: #5a5570;
+      line-height: 1.35;
+      background:
+        radial-gradient(circle at top right, rgba(255,255,255,0.95), transparent 36%),
+        linear-gradient(180deg, rgba(255,255,255,0.96), rgba(255,247,251,0.90));
+    }
+
+    .sticker {
+      position: absolute;
+      font-size: 15px;
+      opacity: 0.82;
+      filter: drop-shadow(0 2px 4px rgba(255, 164, 202, 0.15));
+    }
+
+    .sticker.s1 { left: 10px; top: 8px; }
+    .sticker.s2 { right: 12px; bottom: 8px; }
+
+    /* 底部提示 */
+    .hint {
+      position: fixed;
+      left: 50%;
+      bottom: 20px;
+      transform: translateX(-50%);
+      z-index: 99999;
+      background: rgba(255,255,255,0.76);
+      border: 1px solid rgba(255,255,255,0.82);
+      box-shadow: 0 10px 28px rgba(255, 171, 210, 0.10);
+      backdrop-filter: blur(10px);
+      border-radius: 999px;
+      padding: 11px 18px;
+      font-size: 13px;
+      color: #7c728f;
+      letter-spacing: 0.2px;
+      cursor: pointer;
+      transition: transform .2s ease, box-shadow .2s ease;
+    }
+
+    .hint:hover {
+      transform: translateX(-50%) translateY(-2px);
+      box-shadow: 0 14px 32px rgba(255, 171, 210, 0.16);
+    }
+
+    /* 点击出现的小爱心 */
+    .click-heart {
+      position: absolute;
+      font-size: 18px;
+      pointer-events: none;
+      animation: flyHeart 1s ease-out forwards;
+      user-select: none;
+      z-index: 9999;
+    }
+
+    @keyframes flyHeart {
+      0% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(0.8);
+      }
+      100% {
+        opacity: 0;
+        transform: translate(-50%, -95px) scale(1.4) rotate(12deg);
+      }
+    }
+
+    /* 开场标题 */
+    .floating-title {
+      position: absolute;
+      left: 50%;
+      top: 10%;
+      transform: translateX(-50%);
+      z-index: 3;
+      padding: 12px 22px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.55);
+      border: 1px solid rgba(255,255,255,0.75);
+      backdrop-filter: blur(8px);
+      box-shadow: 0 10px 22px rgba(255, 180, 214, 0.08);
+      font-size: 18px;
+      font-weight: 700;
+      color: #7f6f97;
+      letter-spacing: 1px;
+      pointer-events: none;
+      animation: titleFloat 3.2s ease-in-out infinite;
+    }
+
+    @keyframes titleFloat {
+      0%, 100% { transform: translateX(-50%) translateY(0); }
+      50% { transform: translateX(-50%) translateY(-6px); }
+    }
+
+    /* 手机适配 */
+    @media (max-width: 768px) {
+      .win {
+        width: 154px;
+        height: 98px;
+      }
+
+      .content {
+        font-size: 14px;
+      }
+
+      .floating-title {
+        font-size: 15px;
+        padding: 10px 16px;
+        top: 12%;
+      }
+
+      .hint {
+        font-size: 12px;
+        padding: 9px 14px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="stage">
+    <div class="bg-glow one"></div>
+    <div class="bg-glow two"></div>
+    <div class="bg-glow three"></div>
+    <div class="floating-title">今日份可爱提醒已送达 ✦</div>
+  </div>
+
+  <div class="hint">康 佳 怡</div>
+
+  <script>
+    const NEXT_URL = "giftaddress.html"; // 改成你的下一页地址
+    const WINDOW_W = window.innerWidth <= 768 ? 154 : 178;
+    const WINDOW_H = window.innerWidth <= 768 ? 98 : 108;
+
+    const HEART_COUNT = 88;
+    const HEART_DELAY = 34;
+    const HEART_HOLD = 1500;
+
+    const FULL_HOLD = 3600;
+    const FINAL_VANISH_TIME = 1200;
+
+    const texts = [
+      "康佳怡是小猪🐷",
+      "今天也要开心",
+      "记得好好吃饭",
+      "不许偷偷熬夜",
+      "你已经很棒啦",
+      "要一直平安顺利",
+      "心情要甜甜的",
+      "慢一点也没关系",
+      "要记得爱自己",
+      "会有好事发生",
+      "你值得被温柔对待",
+      "今天也闪闪发光",
+      "睡前记得盖好被子",
+      "烦恼会慢慢变轻",
+      "要一直健康呀",
+      "愿你每天都被偏爱"
+    ];
+
+    const titles = [
+      "爱心提醒",
+      "甜度通知",
+      "小小警报",
+      "可爱弹窗",
+      "喜欢加载中",
+      "今日提示",
+      "温柔消息",
+      "撒娇提醒"
+    ];
+
+    const titleColors = [
+      ["#ff9fc8", "#ffc1dc"],
+      ["#91c8ff", "#bfe2ff"],
+      ["#c4b0ff", "#ddccff"],
+      ["#ffb58c", "#ffd2b3"],
+      ["#ffd86b", "#ffeaa8"]
+    ];
+
+    const stickers = ["💗", "✨", "🌷", "🫧", "🎀", "🍓", "☁️", "⭐"];
+    const stage = document.getElementById("stage");
+    const popups = [];
+    const timers = [];
+
+    let stopped = false;
+    let redirecting = false;
+    let animationStarted = false;
+    let rafId = null;
+
+    function rand(min, max) {
+      return Math.random() * (max - min) + min;
+    }
+
+    function choice(arr) {
+      return arr[Math.floor(Math.random() * arr.length)];
+    }
+
+    function sleep(ms) {
+      return new Promise(resolve => {
+        const t = setTimeout(resolve, ms);
+        timers.push(t);
+      });
+    }
+
+    function goNextPage() {
+      if (redirecting) return;
+      redirecting = true;
+      window.location.href = NEXT_URL;
+    }
+
+    function createStars(count = 28) {
+      for (let i = 0; i < count; i++) {
+        const star = document.createElement("div");
+        star.className = "star";
+        star.textContent = Math.random() > 0.5 ? "✦" : "✧";
+        star.style.left = `${rand(2, 96)}vw`;
+        star.style.top = `${rand(3, 94)}vh`;
+        star.style.fontSize = `${rand(10, 22)}px`;
+        star.style.animationDuration = `${rand(1.8, 3.8)}s`;
+        star.style.animationDelay = `${rand(0, 2)}s`;
+        stage.appendChild(star);
+      }
+    }
+
+    function createClouds() {
+      const cloudConfigs = [
+        { top: "12%", scale: 0.9, duration: 38, delay: 0 },
+        { top: "24%", scale: 0.72, duration: 30, delay: 6 },
+        { top: "70%", scale: 1.0, duration: 42, delay: 11 }
+      ];
+
+      cloudConfigs.forEach(cfg => {
+        const cloud = document.createElement("div");
+        cloud.className = "cloud";
+        cloud.style.top = cfg.top;
+        cloud.style.transform = `scale(${cfg.scale})`;
+        cloud.style.animationDuration = `${cfg.duration}s`;
+        cloud.style.animationDelay = `-${cfg.delay}s`;
+        cloud.innerHTML = `<span class="blush b1"></span><span class="blush b2"></span>`;
+        stage.appendChild(cloud);
+      });
+    }
+
+    function createClickHeart(x, y) {
+      const heart = document.createElement("div");
+      heart.className = "click-heart";
+      heart.textContent = choice(["💖", "💗", "💕", "✨"]);
+      heart.style.left = `${x}px`;
+      heart.style.top = `${y}px`;
+      stage.appendChild(heart);
+
+      setTimeout(() => {
+        if (heart.parentNode) heart.parentNode.removeChild(heart);
+      }, 1000);
+    }
+
+    function heartPositionsCentered(n, w, h) {
+      const p = [];
+      const cx = w / 2;
+      const cy = h / 2 + 10;
+      const scale = Math.min(w, h) / 48;
+
+      for (let i = 0; i < n; i++) {
+        const th = i / n * 2 * Math.PI;
+        const x = 16 * Math.pow(Math.sin(th), 3);
+        const y = 13 * Math.cos(th) - 5 * Math.cos(2 * th) - 2 * Math.cos(3 * th) - Math.cos(4 * th);
+
+        const sx = Math.floor(cx + x * scale - WINDOW_W / 2);
+        const sy = Math.floor(cy - (y + 2.2) * scale - WINDOW_H / 2);
+        p.push([sx, sy]);
+      }
+
+      return p;
+    }
+
+    function fullScreenGridPositions(w, h) {
+      const positions = [];
+      const stepX = window.innerWidth <= 768 ? 132 : 150;
+      const stepY = window.innerWidth <= 768 ? 84 : 90;
+
+      const startX = -WINDOW_W;
+      const startY = -WINDOW_H;
+      const endX = w + WINDOW_W;
+      const endY = h + WINDOW_H;
+
+      for (let y = startY; y <= endY; y += stepY) {
+        for (let x = startX; x <= endX; x += stepX) {
+          positions.push([x + rand(-12, 12), y + rand(-8, 8)]);
+        }
+      }
+
+      const cx = w / 2 - WINDOW_W / 2;
+      const cy = h / 2 - WINDOW_H / 2;
+
+      positions.sort((a, b) => {
+        const da = Math.hypot(a[0] - cx, a[1] - cy);
+        const db = Math.hypot(b[0] - cx, b[1] - cy);
+        return da - db;
+      });
+
+      return positions;
+    }
+
+    function makeWindow(x, y, text) {
+      const win = document.createElement("div");
+      win.className = "win";
+      const pair = choice(titleColors);
+
+      win.innerHTML = `
+        <div class="titlebar" style="background: linear-gradient(90deg, ${pair[0]}, ${pair[1]});">
+          <div class="title-left">
+            <div class="win-icon"></div>
+            <div class="title-text">${choice(titles)}</div>
+          </div>
+          <div class="controls">
+            <div class="btn min"></div>
+            <div class="btn max"></div>
+            <div class="btn close"></div>
+          </div>
+        </div>
+        <div class="content">
+          <span class="sticker s1">${choice(stickers)}</span>
+          <span>${text || choice(texts)}</span>
+          <span class="sticker s2">${choice(stickers)}</span>
+        </div>
+      `;
+
+      stage.appendChild(win);
+      win.classList.add("show");
+
+      const obj = {
+        el: win,
+        baseX: x,
+        baseY: y,
+        bornAt: performance.now(),
+        floatAmpX: rand(2, 8),
+        floatAmpY: rand(5, 12),
+        jitterAmp: rand(0.5, 1.8),
+        rotateAmp: rand(0.8, 2.5),
+        speedA: rand(0.0016, 0.003),
+        speedB: rand(0.0018, 0.0038),
+        speedC: rand(0.003, 0.005),
+        phaseA: rand(0, Math.PI * 2),
+        phaseB: rand(0, Math.PI * 2),
+        phaseC: rand(0, Math.PI * 2),
+        dead: false
+      };
+
+      popups.push(obj);
+      return obj;
+    }
+
+    function setTransform(obj, now) {
+      if (!obj || obj.dead || !obj.el || !obj.el.isConnected) return;
+
+      const t = now - obj.bornAt;
+      let dx = 0, dy = 0, rot = 0;
+
+      if (animationStarted) {
+        dx = Math.sin(t * obj.speedA + obj.phaseA) * obj.floatAmpX +
+             Math.sin(t * obj.speedC + obj.phaseC) * obj.jitterAmp;
+
+        dy = Math.cos(t * obj.speedB + obj.phaseB) * obj.floatAmpY +
+             Math.cos(t * obj.speedC * 1.12 + obj.phaseA) * obj.jitterAmp;
+
+        rot = Math.sin(t * obj.speedA * 0.7 + obj.phaseB) * obj.rotateAmp;
+      }
+
+      obj.el.style.left = `${obj.baseX + dx}px`;
+      obj.el.style.top = `${obj.baseY + dy}px`;
+      obj.el.style.transform = `rotate(${rot}deg)`;
+    }
+
+    function animate(now) {
+      for (const p of popups) {
+        setTransform(p, now);
+      }
+      rafId = requestAnimationFrame(animate);
+    }
+
+    function destroyWindow(obj) {
+      if (!obj || obj.dead || !obj.el) return;
+      obj.dead = true;
+      obj.el.classList.add("vanish");
+      const t = setTimeout(() => {
+        if (obj.el && obj.el.parentNode) obj.el.parentNode.removeChild(obj.el);
+      }, 500);
+      timers.push(t);
+    }
+
+    async function vanishAllAndRedirect() {
+      if (stopped) return;
+      stopped = true;
+
+      for (const t of timers) clearTimeout(t);
+      timers.length = 0;
+
+      const alive = popups.filter(p => !p.dead && p.el && p.el.isConnected);
+      if (alive.length === 0) {
+        goNextPage();
+        return;
+      }
+
+      const interval = FINAL_VANISH_TIME / alive.length;
+
+      for (const p of alive) {
+        destroyWindow(p);
+        await sleep(interval);
+      }
+
+      await sleep(420);
+      goNextPage();
+    }
+
+    async function run() {
+      const sw = window.innerWidth;
+      const sh = window.innerHeight;
+
+      const heart = heartPositionsCentered(HEART_COUNT, sw, sh);
+
+      for (let i = 0; i < heart.length; i++) {
+        if (stopped) return;
+        const [x, y] = heart[i];
+        const text = i === Math.floor(heart.length / 2) ? "你要一直被温柔喜欢" : choice(texts);
+        makeWindow(x, y, text);
+        await sleep(HEART_DELAY);
+      }
+
+      if (stopped) return;
+      animationStarted = true;
+      await sleep(HEART_HOLD);
+
+      const existingKey = new Set(
+        popups.map(p => `${Math.round(p.baseX)}_${Math.round(p.baseY)}`)
+      );
+
+      const fullPositions = fullScreenGridPositions(sw, sh);
+
+      for (const [x, y] of fullPositions) {
+        if (stopped) return;
+        const key = `${Math.round(x)}_${Math.round(y)}`;
+        if (existingKey.has(key)) continue;
+
+        makeWindow(x, y, choice(texts));
+        await sleep(18);
+      }
+
+      if (stopped) return;
+      await sleep(FULL_HOLD);
+      await vanishAllAndRedirect();
+    }
+
+    document.addEventListener("keydown", (e) => {
+      if (e.code === "Space") {
+        e.preventDefault();
+        vanishAllAndRedirect();
+      }
+    });
+
+    document.addEventListener("click", (e) => {
+      createClickHeart(e.clientX, e.clientY);
+
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      }
+    });
+
+    createStars();
+    createClouds();
+    rafId = requestAnimationFrame(animate);
+    run();
+  </script>
+</body>
+</html>
