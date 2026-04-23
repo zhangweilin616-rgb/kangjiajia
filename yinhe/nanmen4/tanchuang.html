@@ -173,6 +173,8 @@
       opacity: 0;
       z-index: 10;
       transform: scale(0.72);
+      /* 开启硬件加速，优化动画性能 */
+      will-change: transform, opacity;
     }
 
     .win.show {
@@ -189,9 +191,10 @@
       100% { opacity: 1; transform: scale(1) translateY(0); }
     }
 
+    /* 优化后的消失动画，去除了高斯模糊 */
     @keyframes vanish {
-      0% { opacity: 1; filter: blur(0); }
-      100% { opacity: 0; filter: blur(8px); transform: scale(0.6) translateY(10px); }
+      0% { opacity: 1; transform: scale(1) translateY(0); }
+      100% { opacity: 0; transform: scale(0.6) translateY(10px); }
     }
 
     .titlebar {
@@ -632,19 +635,20 @@
       rafId = requestAnimationFrame(animate);
     }
 
+    // 优化后的销毁函数：不操作 DOM 移除，只加动画类名
     function destroyWindow(obj) {
       if (!obj || obj.dead || !obj.el) return;
       obj.dead = true;
       obj.el.classList.add("vanish");
-      const t = setTimeout(() => {
-        if (obj.el && obj.el.parentNode) obj.el.parentNode.removeChild(obj.el);
-      }, 500);
-      timers.push(t);
     }
 
+    // 优化后的消失跳转函数：批量延时非阻塞处理
     async function vanishAllAndRedirect() {
       if (stopped) return;
       stopped = true;
+
+      // 停止不必要的动画计算，解放 CPU
+      if (rafId) cancelAnimationFrame(rafId);
 
       for (const t of timers) clearTimeout(t);
       timers.length = 0;
@@ -657,12 +661,16 @@
 
       const interval = FINAL_VANISH_TIME / alive.length;
 
-      for (const p of alive) {
-        destroyWindow(p);
-        await sleep(interval);
-      }
+      // 使用定时器批量排队，防止主线程拥堵卡死
+      alive.forEach((p, index) => {
+        const t = setTimeout(() => {
+          destroyWindow(p);
+        }, index * interval);
+        timers.push(t);
+      });
 
-      await sleep(420);
+      // 等待所有动画执行完毕后再跳转
+      await sleep(FINAL_VANISH_TIME + 600); 
       goNextPage();
     }
 

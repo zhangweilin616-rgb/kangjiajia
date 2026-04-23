@@ -222,5 +222,31 @@
         });
     </script>
 
-</body>
+<audio id="my-bgm" src="你的音乐链接.mp3" loop></audio>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const bgm = document.getElementById("my-bgm");
+    
+    // 连接到同一个 "bgm_channel" 广播频道
+    const channel = new BroadcastChannel('bgm_channel');
+
+    // 监听来自控制台的消息
+    channel.onmessage = function(event) {
+        const action = event.data.command;
+        console.log("收到指令: " + action);
+
+        if (action === 'play') {
+            bgm.play().catch(e => console.warn("需要用户先点击一下此页面才能播放"));
+        } 
+        else if (action === 'pause') {
+            bgm.pause();
+        } 
+        else if (action === 'restart') {
+            bgm.currentTime = 0;
+            bgm.play().catch(e => console.warn("需要用户先点击一下此页面才能播放"));
+        }
+    };
+});
+</script>
 </html>
