@@ -140,6 +140,7 @@
             <div class="line"> </div>
             <div class="line"> </div>
             <div class="line"> </div>
+            <div class="line"> </div>
         </div>
 
         <div class="ui-overlay" id="uiOverlay">
@@ -149,6 +150,12 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            // 1. 打开此页面时，立即主动向父级（外层页面）发送停止音乐的指令
+            window.parent.postMessage('stop_music', '*');
+
+            // 2. 如果当前页面内部还有其他的 audio 标签，直接暂停它们（双重保险）
+            document.querySelectorAll('audio').forEach(audio => audio.pause());
+
             const video = document.getElementById('burnVideo');
             const btn = document.getElementById('readBtn');
             const overlay = document.getElementById('uiOverlay');

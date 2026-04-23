@@ -12,17 +12,26 @@
             height: 100%;
             width: 100%;
             overflow: hidden;
+            background-color: #000; /* 加个底色防止闪烁 */
         }
 
-        /* 背景 */
+        /* 第一页容器：用来包裹视频和文字 */
+        #first-page {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        /* 背景视频 */
         .video-background {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            object-fit: cover; /* 保持内容的比例并覆盖整个容器 */
-            z-index: -1; /* 确保内容在最底层 */
+            object-fit: cover;
+            z-index: -1; 
         }
 
         /* 内容样式 */
@@ -32,39 +41,79 @@
             left: 50%;
             transform: translate(-50%, -50%);
             color: rgb(240, 17, 155);
-            font-size: 0.5rem;
-            font-family: 华文彩云;
+            font-size: 2rem; /* 建议调大一点，0.5rem在某些设备上可能太小 */
+            font-family: '华文彩云', cursive;
             animation: pulse 1.5s infinite;
             text-align: center;
-            z-index: 1; /* 确保内容显示在内容之上 */
+            z-index: 1;
+            cursor: pointer; /* 提示用户可点击 */
+        }
+
+        /* 新增：隐藏的iframe，跳转后将覆盖全屏 */
+        #content-iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+            z-index: 10; /* 层级最高，确保覆盖第一页 */
+            display: none; /* 初始状态隐藏 */
         }
     </style>
 </head>
 <body>
 
-    <video class="video-background" autoplay muted loop>
-        <source src="rose.mp4" type="video/mp4">
-        Your browser does not support the video tag.
-    </video>
-    
-    <audio id="music1" loop preload="auto" controls hidden>
-         <source src="http://music.163.com/song/media/outer/url?id=32507038.mp3">
-         Your browser does not support the audio element.
+    <div id="first-page">
+        <video class="video-background" autoplay muted loop>
+            <source src="rose.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+        
+        <div class="content">
+        </div>
+    </div>
+
+    <audio id="music1" loop preload="auto">
+        <source src="music.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
     </audio>
+
+    <iframe id="content-iframe" src=""></iframe>
      
     <script>
+        // 1. 原有的点击事件：播放音乐并加载 iframe
         document.body.addEventListener('click', function() {
-            // 尝试播放音乐
             var myAudio = document.getElementById('music1');
-            myAudio.play().catch(e => console.log("播放失败", e));
+            var firstPage = document.getElementById('first-page');
+            var iframe = document.getElementById('content-iframe');
+
+            // 尝试播放音乐
+            if (myAudio.paused) {
+                myAudio.play().catch(e => console.log("播放失败", e));
+            }
             
-            // 立即跳转到下一页，请将 'next.html' 替换为你实际的下一页文件名
-            window.location.href = 'yinhe/yinhexinyun.html'; 
+            // 利用 iframe 模拟“跳转”到下一页
+            if (iframe.style.display === 'none' || iframe.style.display === '') {
+                iframe.src = 'yinhe/yinhexinyun.html'; 
+                iframe.style.display = 'block'; 
+                firstPage.style.display = 'none'; 
+            }
+        });
+
+        // 2. 【新增代码】接收来自 iframe（子页面）的指令并暂停音乐
+        window.addEventListener('message', function(event) {
+            // 检查收到的消息是不是 'stop_music'
+            if (event.data === 'stop_music') {
+                var myAudio = document.getElementById('music1');
+                // 如果音乐正在播放，就将其暂停
+                if (myAudio && !myAudio.paused) {
+                    myAudio.pause();
+                    console.log("已接收到子页面指令，背景音乐已暂停");
+                }
+            }
         });
     </script>
-    
-    <div class="content">
-    </div>
 
 </body>
 </html>

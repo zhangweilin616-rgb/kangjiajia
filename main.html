@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>main</title>
+    <style>
+        body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; }
+        /* iframe 铺满全屏 */
+        iframe { width: 100%; height: 100%; border: none; }
+    </style>
+</head>
+<body>
+
+    <audio id="global_music" src="music.mp3" loop autoplay hidden></audio>
+
+    <iframe id="my_iframe" src="index.html" name="main_frame"></iframe>
+
+    <script>
+        var audio = document.getElementById('global_music');
+        var iframe = document.getElementById('my_iframe');
+        
+        // 1. 设置不需要播放音乐的页面路径或名称 (例如: 'mute_page.html')
+        var silentPage = "burn.html"; 
+
+        // 解决浏览器拦截自动播放的问题
+        document.body.addEventListener('click', function() {
+            if (audio.paused) {
+                audio.play();
+            }
+        }, { once: true }); // once: true 表示只执行一次
+
+        // 2. 监听 iframe 页面加载完成的事件
+        iframe.addEventListener('load', function() {
+            try {
+                // 获取当前 iframe 内部页面的 URL
+                var currentUrl = iframe.contentWindow.location.href;
+
+                // 3. 判断当前 URL 是否包含我们设定的静音页面名称
+                if (currentUrl.includes(silentPage)) {
+                    audio.pause(); // 到达指定页面，暂停音乐
+                } else {
+                    // 到达其他页面，如果音乐是暂停的，则尝试恢复播放
+                    if (audio.paused) {
+                        var playPromise = audio.play();
+                        // 兼容现代浏览器的 Promise 机制，捕获可能的自动播放拦截异常
+                        if (playPromise !== undefined) {
+                            playPromise.catch(function(error) {
+                                console.warn("自动播放恢复失败，可能需要用户再次交互:", error);
+                            });
+                        }
+                    }
+                }
+            } catch (error) {
+                // 现实中的限制：如果 iframe 加载了外部域名（跨域），这里会报错
+                console.error("无法读取 iframe 的 URL，请确保所有页面在同源（同一个域名和端口）下:", error);
+            }
+        });
+    </script>
+
+</body>
+</html>
